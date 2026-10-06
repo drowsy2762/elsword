@@ -1,0 +1,755 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>엘소드 강화 시뮬레이터</title>
+    <style>
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+        background: #13151b;
+        color: #eee;
+        padding: 20px;
+      }
+      .container {
+        max-width: 680px;
+        margin: 0 auto;
+        background: #1f2330;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      }
+      h1 {
+        text-align: center;
+        color: #ff9800;
+        font-size: 22px;
+        margin-bottom: 20px;
+      }
+
+      .equipment-card {
+        background: #2a2f42;
+        border: 2px solid #444;
+        border-radius: 10px;
+        padding: 18px;
+        text-align: center;
+        margin-bottom: 15px;
+      }
+      .item-name {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 6px;
+        color: #90caf9;
+      }
+      .item-level {
+        font-size: 46px;
+        font-weight: 900;
+        margin: 8px 0;
+        color: #fff;
+      }
+      .status-broken {
+        color: #f44336 !important;
+      }
+
+      .amulet-section {
+        background: #181b24;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border: 1px solid #333a4d;
+      }
+      .section-title {
+        font-size: 13px;
+        font-weight: bold;
+        color: #ffca28;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .amulet-group {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .btn-amulet {
+        background: #5c6bc0;
+        color: #fff;
+        border: none;
+        padding: 7px 12px;
+        border-radius: 5px;
+        font-size: 13px;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .btn-amulet:hover {
+        background: #3f51b5;
+      }
+
+      .auto-section {
+        background: #1c2738;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        border: 1px solid #2d4263;
+        text-align: center;
+      }
+      .auto-controls {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 6px;
+      }
+      select {
+        background: #2a2f42;
+        color: #fff;
+        border: 1px solid #555;
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 14px;
+        font-weight: bold;
+      }
+
+      .protect-box {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-bottom: 15px;
+        font-size: 14px;
+        background: #181b24;
+        padding: 10px;
+        border-radius: 8px;
+      }
+      .protect-box label {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .btn-group {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+      }
+      button.action-btn {
+        border: none;
+        padding: 12px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+      }
+      .btn-upgrade {
+        background: #ff9800;
+        color: #111;
+      }
+      .btn-upgrade:hover {
+        background: #fb8c00;
+      }
+      .btn-auto {
+        background: #e91e63;
+        color: #fff;
+      }
+      .btn-auto:hover {
+        background: #c2185b;
+      }
+      .btn-stop {
+        background: #d32f2f;
+        color: #fff;
+      }
+      .btn-repair {
+        background: #29b6f6;
+        color: #111;
+      }
+      .btn-reset {
+        background: #555;
+        color: #fff;
+      }
+      button:disabled {
+        background: #444;
+        color: #777;
+        cursor: not-allowed;
+      }
+
+      .cost-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+        gap: 8px;
+        background: #181b24;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        font-size: 12px;
+        margin-bottom: 20px;
+      }
+      .cost-board div span {
+        display: block;
+        font-size: 15px;
+        font-weight: bold;
+        color: #ffca28;
+        margin-top: 4px;
+      }
+
+      .rate-details {
+        background: #181b24;
+        border-radius: 8px;
+        padding: 10px 12px;
+        margin-bottom: 20px;
+        font-size: 13px;
+      }
+      .rate-details summary {
+        cursor: pointer;
+        font-weight: bold;
+        color: #ffca28;
+      }
+      .rate-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        text-align: center;
+      }
+      .rate-table th,
+      .rate-table td {
+        border: 1px solid #2d3345;
+        padding: 4px 6px;
+      }
+      .rate-table th {
+        background: #222738;
+      }
+      .rate-table tr.current-row td {
+        background: #33405f;
+        font-weight: bold;
+      }
+
+      .log-container {
+        background: #101217;
+        height: 250px;
+        overflow-y: auto;
+        padding: 12px;
+        border-radius: 8px;
+        font-size: 13px;
+        border: 1px solid #2d3345;
+      }
+      .log-entry {
+        margin: 3px 0;
+        padding-bottom: 3px;
+        border-bottom: 1px solid #1c202d;
+      }
+      .succ {
+        color: #4caf50;
+        font-weight: bold;
+      }
+      .fail {
+        color: #aaa;
+      }
+      .drop {
+        color: #ffb74d;
+      }
+      .reset-lv {
+        color: #e57373;
+      }
+      .break {
+        color: #f44336;
+        font-weight: bold;
+      }
+      .amulet-log {
+        color: #7986cb;
+        font-weight: bold;
+      }
+      .auto-log {
+        color: #e91e63;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>엘소드 강화 시뮬레이터 (공식 확률 기준)</h1>
+
+      <div class="equipment-card">
+        <div class="item-name" id="item-title">+0 절대자의 검</div>
+        <div class="item-level" id="item-display">+0</div>
+        <div id="item-status" style="font-size: 14px; color: #81c784">
+          정상 상태
+        </div>
+      </div>
+
+      <div class="amulet-section">
+        <div class="section-title">
+          ⚡ 강화의 부적 사용 (원하는 수치로 즉시 점핑)
+        </div>
+        <div class="amulet-group" id="amulet-group">
+          <button class="btn-amulet" onclick="applyAmulet(7)">7강 부적</button>
+          <button class="btn-amulet" onclick="applyAmulet(8)">8강 부적</button>
+          <button class="btn-amulet" onclick="applyAmulet(9)">9강 부적</button>
+          <button class="btn-amulet" onclick="applyAmulet(10)">
+            10강 부적
+          </button>
+        </div>
+      </div>
+
+      <div class="auto-section">
+        <div class="section-title" style="color: #80d8ff">
+          🎯 오토 강화 설정
+        </div>
+        <div class="auto-controls">
+          <span>목표 달성 수치:</span>
+          <select id="target-level">
+            <option value="8">+8강</option>
+            <option value="9">+9강</option>
+            <option value="10" selected>+10강</option>
+            <option value="11">+11강 (극악)</option>
+            <option value="12">+12강</option>
+            <option value="13">+13강 (종결)</option>
+          </select>
+          <span>확률 기준:</span>
+          <select id="rate-version" onchange="changeRateVersion()">
+            <option value="after" selected>4/29 대장장이 개선 이후</option>
+            <option value="before">개선 이전 (2021.03.31 공지)</option>
+          </select>
+          <span>속도:</span>
+          <select id="auto-speed">
+            <option value="200">느림</option>
+            <option value="50">보통</option>
+            <option value="20" selected>빠름</option>
+            <option value="1">최대</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="protect-box">
+        <label>
+          <input type="checkbox" id="use-fluor" checked /> 플루오르 스톤 사용
+          (하락/초기화 방지, 방어 발동 시 1개 소모 ※ 공지에 없는 임의 규칙)
+        </label>
+      </div>
+
+      <div class="cost-board">
+        <div>강화 시도<span id="stat-attempts">0회</span></div>
+        <div>플루오르 소모<span id="stat-fluor">0개</span></div>
+        <div>복원 주문서<span id="stat-scrolls">0개</span></div>
+        <div>강화의 부적<span id="stat-amulets">0개</span></div>
+        <div>하락<span id="stat-drops">0회</span></div>
+        <div>초기화<span id="stat-resets">0회</span></div>
+        <div>파괴<span id="stat-breaks">0회</span></div>
+        <div>총 소모 ED<span id="stat-ed">0 ED</span></div>
+      </div>
+
+      <div class="btn-group">
+        <button
+          class="action-btn btn-upgrade"
+          id="btn-up"
+          onclick="attemptUpgrade()"
+        >
+          강화 1회
+        </button>
+        <button
+          class="action-btn btn-repair"
+          id="btn-fix"
+          onclick="repairItem()"
+          style="display: none"
+        >
+          복원의 주문서
+        </button>
+        <button
+          class="action-btn btn-auto"
+          id="btn-auto-toggle"
+          onclick="toggleAutoUpgrade()"
+        >
+          오토 강화 시작
+        </button>
+        <button class="action-btn btn-reset" onclick="resetAll()">
+          초기화
+        </button>
+      </div>
+
+      <details class="rate-details">
+        <summary>단계별 강화 확률표 (넥슨 공식 · 엘의 해머 미적용 일반 강화)</summary>
+        <table class="rate-table" id="rate-table">
+          <thead>
+            <tr>
+              <th>현재</th>
+              <th>성공</th>
+              <th>유지</th>
+              <th>하락</th>
+              <th>초기화</th>
+              <th>파괴</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </details>
+
+      <div class="log-container" id="log-box"></div>
+    </div>
+
+    <script>
+      // 넥슨 공식 공지 "강화, 재련 단계별 확률 안내" (2021.03.31, 엘의 해머 미적용 일반 강화)
+      // https://elsword.nexon.com/News/Notice/View?n4ArticleSN=133600
+      // 공지상 무기/방어구 구분 없이 하나의 표를 사용하며, 파괴는 +8→+9부터 발생
+      // [키] 현재 수치 → 다음 단계 시도 시 확률 (총합 100%)
+      const R = (succ, dest, keep, drop, reset) => ({
+        succ,
+        dest,
+        keep,
+        drop,
+        reset,
+      });
+      const RATE_SETS = {
+        // 4/29 대장장이 추가 개선 이후 확률
+        after: {
+          0: R(100, 0, 0, 0, 0),
+          1: R(100, 0, 0, 0, 0),
+          2: R(90, 0, 10, 0, 0),
+          3: R(80, 0, 20, 0, 0),
+          4: R(70, 0, 30, 0, 0),
+          5: R(60, 0, 40, 0, 0),
+          6: R(20, 0, 80, 0, 0),
+          7: R(5, 0, 15, 30, 50),
+          8: R(2, 20, 10, 28, 40),
+          9: R(1, 25, 7, 27, 40),
+          10: R(0.7, 35.3, 7, 27, 30),
+          11: R(1, 25, 7, 27, 40),
+          12: R(1, 29, 3, 27, 40),
+        },
+        // 공지 당시(개선 이전) 확률: 4~6강 구간만 다름
+        before: {
+          0: R(100, 0, 0, 0, 0),
+          1: R(100, 0, 0, 0, 0),
+          2: R(90, 0, 10, 0, 0),
+          3: R(80, 0, 20, 0, 0),
+          4: R(70, 0, 20, 10, 0),
+          5: R(60, 0, 20, 20, 0),
+          6: R(20, 0, 20, 30, 30),
+          7: R(5, 0, 15, 30, 50),
+          8: R(2, 20, 10, 28, 40),
+          9: R(1, 25, 7, 27, 40),
+          10: R(0.7, 35.3, 7, 27, 30),
+          11: R(1, 25, 7, 27, 40),
+          12: R(1, 29, 3, 27, 40),
+        },
+      };
+      let RATES = RATE_SETS.after;
+
+      const MAX_LEVEL = 13;
+      const MAX_LOGS = 150;
+
+      // 비용 설정 (공지에 없는 임의 값 · 필요에 맞게 조정)
+      const UPGRADE_COST_PER_LV = 80000; // 강화 시도: (현재레벨+1) × 이 값
+      const FLUOR_COST = 200000; // 플루오르 스톤 1개
+      const SCROLL_COST = 500000; // 복원의 주문서 1개
+      const AMULET_COST = { 7: 1000000, 8: 2000000, 9: 4000000, 10: 8000000 };
+
+      let currentLevel = 0;
+      let isBroken = false;
+      let attempts = 0;
+      let fluorUsed = 0;
+      let scrollsUsed = 0;
+      let amuletsUsed = 0;
+      let dropCount = 0;
+      let resetCount = 0;
+      let breakCount = 0;
+      let totalEd = 0;
+
+      let autoTimer = null;
+      let isAutoRunning = false;
+
+      function pushLog(html) {
+        const box = document.getElementById("log-box");
+        const div = document.createElement("div");
+        div.className = "log-entry";
+        div.innerHTML = html;
+        box.prepend(div);
+
+        while (box.children.length > MAX_LOGS) {
+          box.removeChild(box.lastChild);
+        }
+      }
+
+      function addLog(msg) {
+        pushLog(`[${attempts}회차] ` + msg);
+      }
+
+      function buildRateTable() {
+        const tbody = document.querySelector("#rate-table tbody");
+        tbody.innerHTML = "";
+        for (const lv of Object.keys(RATES)) {
+          const r = RATES[lv];
+          const tr = document.createElement("tr");
+          tr.dataset.lv = lv;
+          tr.innerHTML =
+            `<td>+${lv} → +${+lv + 1}</td><td>${r.succ}%</td><td>${r.keep}%</td>` +
+            `<td>${r.drop}%</td><td>${r.reset}%</td><td>${r.dest}%</td>`;
+          tbody.appendChild(tr);
+        }
+      }
+
+      function changeRateVersion() {
+        const v = document.getElementById("rate-version").value;
+        RATES = RATE_SETS[v];
+        buildRateTable();
+        updateUI();
+      }
+
+      function applyAmulet(targetLv) {
+        if (isAutoRunning) return;
+        if (isBroken) {
+          pushLog(
+            `<span class="fail">파괴된 장비에는 부적을 사용할 수 없습니다. 먼저 복원의 주문서를 사용하세요.</span>`,
+          );
+          return;
+        }
+        currentLevel = targetLv;
+        amuletsUsed++;
+        totalEd += AMULET_COST[targetLv] || 0;
+        pushLog(
+          `<span class="amulet-log">★ [강화의 부적] Lv.${targetLv} 부적을 부여하여 바로 +${targetLv}강이 되었습니다!</span>`,
+        );
+        updateUI();
+      }
+
+      function repairItem() {
+        if (!isBroken) return;
+        isBroken = false;
+        scrollsUsed++;
+        totalEd += SCROLL_COST;
+        addLog(
+          `<span class="succ">복원의 주문서로 장비를 수리했습니다.</span>`,
+        );
+        updateUI();
+      }
+
+      function attemptUpgrade() {
+        if (isBroken) {
+          repairItem();
+          return;
+        }
+        if (currentLevel >= MAX_LEVEL) {
+          if (isAutoRunning) {
+            addLog(
+              `<span class="auto-log">최고 강화(+${MAX_LEVEL})에 도달하여 오토를 종료합니다.</span>`,
+            );
+          }
+          stopAutoUpgrade();
+          return;
+        }
+
+        const rate = RATES[currentLevel];
+        if (!rate) return;
+
+        attempts++;
+        totalEd += (currentLevel + 1) * UPGRADE_COST_PER_LV;
+
+        const fluorActive = document.getElementById("use-fluor").checked;
+
+        // 0~100 사이 난수 뽑기
+        const roll = Math.random() * 100;
+
+        // 1. 성공 판정
+        if (roll < rate.succ) {
+          currentLevel++;
+          addLog(
+            `<span class="succ">강화 성공! <b>+${currentLevel}</b> 달성!</span>`,
+          );
+          updateUI();
+          return;
+        }
+
+        // 2. 실패 판정 (누적 합산 방식으로 정확하게 분기)
+        const failRoll = roll - rate.succ; // 실패 범위(0 ~ 100-succ) 내 상대값
+
+        const cutKeep = rate.keep;
+        const cutDrop = cutKeep + rate.drop;
+        const cutReset = cutDrop + rate.reset;
+
+        if (failRoll < cutKeep) {
+          // 수치 유지
+          addLog(
+            `<span class="fail">강화 실패: 수치 유지 (+${currentLevel})</span>`,
+          );
+        } else if (failRoll < cutDrop) {
+          // 수치 하락
+          if (fluorActive) {
+            fluorUsed++;
+            totalEd += FLUOR_COST;
+            addLog(
+              `<span class="drop">[플루오르] 하락 방어 성공! (+${currentLevel} 유지)</span>`,
+            );
+          } else {
+            dropCount++;
+            currentLevel = Math.max(0, currentLevel - 1);
+            addLog(
+              `<span class="drop">강화 실패: 수치 하락... (+${currentLevel})</span>`,
+            );
+          }
+        } else if (failRoll < cutReset) {
+          // 초기화
+          if (fluorActive) {
+            fluorUsed++;
+            totalEd += FLUOR_COST;
+            addLog(
+              `<span class="reset-lv">[플루오르] 초기화 방어 성공! (+${currentLevel} 유지)</span>`,
+            );
+          } else {
+            resetCount++;
+            currentLevel = 0;
+            addLog(
+              `<span class="reset-lv">강화 대실패: +0으로 완전 초기화!</span>`,
+            );
+          }
+        } else {
+          // 장비 파괴 (+8→+9 이상 실패 시에만 도달)
+          breakCount++;
+          isBroken = true;
+          addLog(`<span class="break">강화 실패: 장비가 파괴되었습니다!</span>`);
+        }
+
+        updateUI();
+      }
+
+      function toggleAutoUpgrade() {
+        if (isAutoRunning) {
+          stopAutoUpgrade();
+        } else {
+          startAutoUpgrade();
+        }
+      }
+
+      function startAutoUpgrade() {
+        const target = parseInt(
+          document.getElementById("target-level").value,
+          10,
+        );
+        const speed = parseInt(document.getElementById("auto-speed").value, 10);
+        if (currentLevel >= target) {
+          alert(`현재 수치(+${currentLevel})가 목표치(+${target}) 이상입니다.`);
+          return;
+        }
+
+        isAutoRunning = true;
+        const autoBtn = document.getElementById("btn-auto-toggle");
+        autoBtn.className = "action-btn btn-stop";
+        autoBtn.innerText = "오토 중지";
+
+        addLog(
+          `<span class="auto-log">▶ 목표 +${target}강 달성을 위한 오토 강화를 시작합니다.</span>`,
+        );
+        updateUI();
+
+        autoTimer = setInterval(() => {
+          if (currentLevel >= target) {
+            addLog(
+              `<span class="succ" style="font-size:15px;">🎉 축하합니다! 목표치 +${target}강에 도달했습니다!</span>`,
+            );
+            stopAutoUpgrade();
+            return;
+          }
+
+          if (isBroken) {
+            repairItem();
+          } else {
+            attemptUpgrade();
+          }
+        }, speed);
+      }
+
+      function stopAutoUpgrade() {
+        if (autoTimer) {
+          clearInterval(autoTimer);
+          autoTimer = null;
+        }
+        isAutoRunning = false;
+        const autoBtn = document.getElementById("btn-auto-toggle");
+        if (autoBtn) {
+          autoBtn.className = "action-btn btn-auto";
+          autoBtn.innerText = "오토 강화 시작";
+        }
+        updateUI();
+      }
+
+      function updateUI() {
+        const display = document.getElementById("item-display");
+        const title = document.getElementById("item-title");
+        const status = document.getElementById("item-status");
+        const btnUp = document.getElementById("btn-up");
+        const btnFix = document.getElementById("btn-fix");
+
+        display.innerText = `+${currentLevel}`;
+        title.innerText = `+${currentLevel} 절대자의 검`;
+
+        if (isBroken) {
+          display.className = "item-level status-broken";
+          status.innerText = "장비 파괴됨 (수리 필요)";
+          status.style.color = "#f44336";
+          btnUp.style.display = "none";
+          btnFix.style.display = "inline-block";
+        } else {
+          display.className = "item-level";
+          status.innerText =
+            currentLevel >= MAX_LEVEL
+              ? `최고 강화 (+${MAX_LEVEL}) 달성!`
+              : "정상 상태";
+          status.style.color = "#81c784";
+          btnUp.style.display = "inline-block";
+          btnFix.style.display = "none";
+        }
+
+        // 오토 중에는 수동 조작/설정 변경 불가
+        btnUp.disabled = isAutoRunning || currentLevel >= MAX_LEVEL;
+        btnFix.disabled = isAutoRunning;
+        document.getElementById("target-level").disabled = isAutoRunning;
+        document.getElementById("auto-speed").disabled = isAutoRunning;
+        document.getElementById("rate-version").disabled = isAutoRunning;
+        document
+          .querySelectorAll(".btn-amulet")
+          .forEach((b) => (b.disabled = isAutoRunning));
+
+        document.getElementById("stat-attempts").innerText =
+          attempts.toLocaleString() + "회";
+        document.getElementById("stat-fluor").innerText =
+          fluorUsed.toLocaleString() + "개";
+        document.getElementById("stat-scrolls").innerText =
+          scrollsUsed.toLocaleString() + "개";
+        document.getElementById("stat-amulets").innerText =
+          amuletsUsed.toLocaleString() + "개";
+        document.getElementById("stat-drops").innerText =
+          dropCount.toLocaleString() + "회";
+        document.getElementById("stat-resets").innerText =
+          resetCount.toLocaleString() + "회";
+        document.getElementById("stat-breaks").innerText =
+          breakCount.toLocaleString() + "회";
+        document.getElementById("stat-ed").innerText =
+          totalEd.toLocaleString() + " ED";
+
+        // 확률표에서 현재 수치 행 강조
+        document.querySelectorAll("#rate-table tbody tr").forEach((tr) => {
+          tr.classList.toggle(
+            "current-row",
+            parseInt(tr.dataset.lv, 10) === currentLevel,
+          );
+        });
+      }
+
+      function resetAll() {
+        stopAutoUpgrade();
+        currentLevel = 0;
+        isBroken = false;
+        attempts = 0;
+        fluorUsed = 0;
+        scrollsUsed = 0;
+        amuletsUsed = 0;
+        dropCount = 0;
+        resetCount = 0;
+        breakCount = 0;
+        totalEd = 0;
+        document.getElementById("log-box").innerHTML = "";
+        updateUI();
+      }
+
+      buildRateTable();
+      updateUI();
+    </script>
+  </body>
+</html>
